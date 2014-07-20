@@ -29,7 +29,7 @@ mp._find = function (key) {
 	}
 	var item = this.first;
 	while (item) {
-		if (item.key === key) {
+		if (item.key === key || (key !== key && item.key !== item.key)) {
 			return item;
 		}
 		item = item.next;
