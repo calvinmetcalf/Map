@@ -3,25 +3,28 @@ var test = require('prova');
 var Map = require('./');
 
 test('get', function (t) {
-	t.plan(3);
+	t.plan(4);
 	var a = {};
 	var map = new Map([
 		['foo', 'bar'],
 		[-0, 'zero'],
-		[a, 'a']
+		[a, 'a'],
+		[NaN, 'nan']
 	]);
 	t.equals(map.get('foo'), 'bar', 'get string');
 	t.equals(map.get(+0), 'zero', 'zeros work');
 	t.equals(map.get(a), 'a', 'object references');
+	t.equals(map.get(NaN), 'nan', 'nan references');
 });
 
 test('set', function (t) {
-	t.plan(3);
+	t.plan(4);
 	var a = {};
 	var map = new Map([
 		['foo', 'bar'],
 		[-0, 'zero'],
-		[a, 'a']
+		[a, 'a'],
+		[NaN, 'nan']
 	]);
 	map.set('foo', 'baz');
 	t.equals(map.get('foo'), 'baz', 'set string');
@@ -30,6 +33,8 @@ test('set', function (t) {
 	var c = {};
 	map.set(c, 'c');
 	t.equals(map.get(c), 'c', 'set object references');
+	map.set(NaN, 'new nan');
+	t.equals(map.get(NaN), 'new nan', 'set nan reference');
 });
 
 test('del and length', function (t) {
