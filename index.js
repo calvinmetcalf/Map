@@ -7,14 +7,9 @@ function Map(iterable) {
 	if (iterable) {
 		var len = iterable.length;
 		var i = -1;
-		var key, value;
 		while (++i < len) {
-			if (i % 2) {
-				value = iterable[i];
-				this.set(key, value);
-			} else {
-				key = iterable[i];
-			}
+			value = iterable[i];
+			this.set(value[0], value[1]);
 		}
 	}
 }
@@ -34,6 +29,7 @@ mp._find = function (key) {
 		}
 		item = item.next;
 	}
+	return false;
 };
 mp.set = function (key, value) {
 	var cur = this._find(key);
@@ -44,7 +40,12 @@ mp.set = function (key, value) {
 			next: undefined,
 			prev: this.last
 		}
-		this.last.next = item;
+		if (this.last) {
+			this.last.next = item;
+		}
+		if (!this.first) {
+			this.first = item;
+		}
 		this.last = item;
 		this._size++;
 	} else {
@@ -83,10 +84,9 @@ mp.delete = function (key, value) {
 mp.clear = function () {
 	this._size = 0;
 	this._gen = {};
-	var len = this.store.length;
 	this.first = this.last = undefined;
 };
-mp.forEach(func) {
+mp.forEach = function (func) {
 	var context = undefined;
 	if (arguments.length > 1) {
 		context = arguments[1];
@@ -98,7 +98,7 @@ mp.forEach(func) {
 	}
 }
 mp.keys = function () {
-	return new MapIterator(this, 'key');
+	return new MapIterator(this, 'keys');
 }
 mp.values = function () {
 	return new MapIterator(this, 'values');

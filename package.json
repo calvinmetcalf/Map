@@ -1,0 +1,15 @@
+{
+  "name": "calvin-map",
+  "version": "0.0.0",
+  "description": "Map ====",
+  "main": "index.js",
+  "scripts": {
+    "test": "prova -p test.js | tspec"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prova": "^1.14.0",
+    "tap-spec": "^0.2.0"
+  }
+}
