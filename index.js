@@ -1,6 +1,6 @@
-module.exports = Map;
+module.exports = $Map;
 
-function Map(iterable) {
+function $Map(iterable) {
 	this._gen = {};
 	this.first = this.last = null;
 	this._size = 0;
@@ -14,7 +14,7 @@ function Map(iterable) {
 		}
 	}
 }
-var mp = Map.prototype;
+var mp = $Map.prototype;
 
 function find(self, key) {
 	if (!self._size) {
@@ -38,12 +38,7 @@ function find(self, key) {
 mp.set = function (key, value) {
 	var cur = find(this, key);
 	if (cur === false) {
-		var item = {
-			key: key,
-			value: value,
-			next: undefined,
-			prev: this.last
-		}
+		var item = new Item(key, value, this.last);
 		if (this.last) {
 			this.last.next = item;
 		}
@@ -96,7 +91,7 @@ mp.clear = function () {
 	this.store.clear();
 };
 mp.forEach = function (func) {
-	var context = undefined;
+	var context;
 	if (arguments.length > 1) {
 		context = arguments[1];
 	}
@@ -119,7 +114,7 @@ Object.defineProperty(mp, 'size', {
 	get: function () {
 		return this._size;
 	}
-})
+});
 
 function MapIterator(map, kind) {
 	this.map = map;
@@ -148,12 +143,12 @@ MapIterator.prototype.next = function () {
 		return {
 			done: false,
 			value: value
-		}
+		};
 	} else {
 		return {
 			done: true,
 			value: value
-		}
+		};
 	}
 };
 
@@ -191,4 +186,11 @@ sp.delete = function (key) {
 };
 sp.clear = function () {
 	this.store = Object.create(null);
+};
+
+function Item(key, value, prev) {
+	this.key = key;
+	this.value = value;
+	this.prev = prev;
+	this.next = undefined;
 }

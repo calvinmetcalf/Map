@@ -4,7 +4,8 @@
   "description": "Map ====",
   "main": "index.js",
   "scripts": {
-    "test": "prova -p test.js | tspec"
+    "test": "prova -p test.js | tspec",
+    "browser": "prova -b -e chrome"
   },
   "author": "",
   "license": "ISC",
