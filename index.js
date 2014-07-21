@@ -1,9 +1,10 @@
-
 module.exports = Map;
+
 function Map(iterable) {
 	this._gen = {};
 	this.first = this.last = null;
 	this._size = 0;
+	this.store = new Store();
 	if (iterable) {
 		var len = iterable.length;
 		var i = -1;
@@ -15,14 +16,17 @@ function Map(iterable) {
 }
 var mp = Map.prototype;
 
-mp._find = function (key) {
-	if (!this._size) {
+function find(self, key) {
+	if (!self._size) {
 		return false;
 	}
-	if (!this.first || !this.last) {
+	if (!self.first || !self.last) {
 		return false;
 	}
-	var item = this.first;
+	if (typeof key !== 'object') {
+		return self.store.get(key);
+	}
+	var item = self.first;
 	while (item) {
 		if (item.key === key || (key !== key && item.key !== item.key)) {
 			return item;
@@ -30,9 +34,9 @@ mp._find = function (key) {
 		item = item.next;
 	}
 	return false;
-};
+}
 mp.set = function (key, value) {
-	var cur = this._find(key);
+	var cur = find(this, key);
 	if (cur === false) {
 		var item = {
 			key: key,
@@ -48,20 +52,21 @@ mp.set = function (key, value) {
 		}
 		this.last = item;
 		this._size++;
+		this.store.set(key, value);
 	} else {
 		cur.value = value;
 	}
 	return this;
 };
 mp.get = function (key) {
-	var pos = this._find(key);
+	var pos = find(this, key);
 	if (pos === false) {
 		return;
 	}
 	return pos.value;
 };
 mp.delete = function (key, value) {
-	var pos = this._find(key);
+	var pos = find(this, key);
 	if (pos === false) {
 		return false;
 	} else {
@@ -78,6 +83,7 @@ mp.delete = function (key, value) {
 			pos.prev.next = pos.next;
 		}
 		this._size--;
+		this.store.delete(key);
 		return true;
 	}
 };
@@ -85,6 +91,7 @@ mp.clear = function () {
 	this._size = 0;
 	this._gen = {};
 	this.first = this.last = undefined;
+	this.store.clear();
 };
 mp.forEach = function (func) {
 	var context = undefined;
@@ -96,16 +103,16 @@ mp.forEach = function (func) {
 		func.call(context, item.value, item.key, this);
 		item = item.next;
 	}
-}
+};
 mp.keys = function () {
 	return new MapIterator(this, 'keys');
-}
+};
 mp.values = function () {
 	return new MapIterator(this, 'values');
-}
+};
 mp.entries = function () {
 	return new MapIterator(this, 'key+value');
-}
+};
 Object.defineProperty(mp, 'size', {
 	get: function () {
 		return this._size;
@@ -147,3 +154,39 @@ MapIterator.prototype.next = function () {
 		}
 	}
 };
+
+function Store() {
+	this.store = Object.create(null);
+}
+
+var sp = Store.prototype;
+
+sp.set = function (key, value) {
+	if (key === -0) {
+		key = 0;
+	}
+	key = (typeof key) + '$' + key;
+	this.store[key] = value;
+};
+sp.get = function (key) {
+	if (key === -0) {
+		key = 0;
+	}
+	key = (typeof key) + '$' + key;
+	if (key in this.store) {
+		return this.store[key];
+	}
+	return false;
+};
+sp.delete = function (key) {
+	if (key === -0) {
+		key = 0;
+	}
+	key = (typeof key) + '$' + key;
+	if (key in this.store) {
+		delete this.store[key];
+	}
+};
+sp.clear = function () {
+	this.store = Object.create(null);
+}
