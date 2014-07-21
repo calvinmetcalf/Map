@@ -52,7 +52,9 @@ mp.set = function (key, value) {
 		}
 		this.last = item;
 		this._size++;
-		this.store.set(key, value);
+		if (typeof key !== 'object') {
+			this.store.set(key, item);
+		}
 	} else {
 		cur.value = value;
 	}
