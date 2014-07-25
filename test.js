@@ -158,3 +158,34 @@ test('iterators', function (t) {
 		});
 	});
 });
+test('clear with iterators', function (t) {
+		t.plan(4);
+		var a = {};
+		var items = [
+			['foo', 'bar'],
+			[-0, 'zero'],
+			[a, 'a']
+		];
+		var map = new Map(items);
+		var iter = map.keys();
+		t.deepEquals(iter.next(), {
+			done: false,
+			value: 'foo'
+		});
+		t.deepEquals(iter.next(), {
+			done: false,
+			value: -0
+		});
+		map.clear();
+		var b = [1,2,3];
+		map.set(b, 'asdf;lkafsd');
+		map.set('foo', 'baz');
+		t.deepEquals(iter.next(), {
+			done: false,
+			value: b
+		});
+		t.deepEquals(iter.next(), {
+			done: true,
+			value: 'foo'
+		});
+	});

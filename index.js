@@ -1,3 +1,6 @@
+var MapIterator = require('./iterator');
+var Store = require('./store');
+
 module.exports = $Map;
 
 function $Map(iterable) {
@@ -23,7 +26,7 @@ function find(self, key) {
 	if (!self.first || !self.last) {
 		return false;
 	}
-	if (typeof key !== 'object') {
+	if (self.cacheable(key)) {
 		return self.store.get(key);
 	}
 	var item = self.first;
@@ -47,7 +50,7 @@ mp.set = function (key, value) {
 		}
 		this.last = item;
 		this._size++;
-		if (typeof key !== 'object') {
+		if (this.cacheable(key)) {
 			this.store.set(key, item);
 		}
 	} else {
@@ -115,78 +118,16 @@ Object.defineProperty(mp, 'size', {
 		return this._size;
 	}
 });
-
-function MapIterator(map, kind) {
-	this.map = map;
-	this.kind = kind;
-	this._gen = this.map._gen;
-	this.val = undefined;
-}
-MapIterator.prototype.next = function () {
-	if (this._gen !== this.map._gen) {
-		this.val = this.map.first;
-		this._gen = this.map._gen;
-	} else if (this.val === undefined) {
-		this.val = this.map.first;
-	} else {
-		this.val = this.val.next;
-	}
-	var value;
-	if (this.kind === 'keys') {
-		value = this.val.key;
-	} else if (this.kind === 'values') {
-		value = this.val.value;
-	} else {
-		value = [this.val.key, this.val.value];
-	}
-	if (this.val.next) {
-		return {
-			done: false,
-			value: value
-		};
-	} else {
-		return {
-			done: true,
-			value: value
-		};
-	}
-};
-
-function Store() {
-	this.store = Object.create(null);
-}
-
-var sp = Store.prototype;
-
-sp.set = function (key, value) {
-	if (key === -0) {
-		key = 0;
-	}
-	key = (typeof key) + '$' + key;
-	this.store[key] = value;
-};
-sp.get = function (key) {
-	if (key === -0) {
-		key = 0;
-	}
-	key = (typeof key) + '$' + key;
-	if (key in this.store) {
-		return this.store[key];
+mp.cacheable = function (key) {
+	if (typeof key !== 'object') {
+		return true;
+	} 
+	if (Object.isExtensible(key)){
+		return true;
 	}
 	return false;
 };
-sp.delete = function (key) {
-	if (key === -0) {
-		key = 0;
-	}
-	key = (typeof key) + '$' + key;
-	if (key in this.store) {
-		delete this.store[key];
-	}
-};
-sp.clear = function () {
-	this.store = Object.create(null);
-};
+
 
 function Item(key, value, prev) {
 	this.key = key;
